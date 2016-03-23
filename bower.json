@@ -1,6 +1,5 @@
 {
-  "name" : "formjs",
-  "version" : "0.0.1",
+  "name" : "kubexia-formjs",
   "main" : "form.js",
   "ignore": []
 }
