@@ -367,9 +367,14 @@
                 }
                 
                 if(redirectTo){
-                    setInterval(function(){
+                    if(delay === false){
                         window.location.href = redirectTo;
-                    },delay);
+                    }
+                    else{
+                        setInterval(function(){
+                            window.location.href = redirectTo;
+                        },delay);
+                    }
                 }
                 
                 var hideFormAfterSuccess = (this.getResponseData('hide_form') ? this.getResponseData('hide_form') : this.getConfig('hideFormAfterSuccess'));
