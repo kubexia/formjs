@@ -151,7 +151,9 @@
             };
             
             this.sendPost = function(){
-                $submitBtn.attr('data-loading-text',this.getConfig('loadingText'));
+                if($submitBtn.attr('data-loading-text') === undefined){
+                    $submitBtn.attr('data-loading-text',this.getConfig('loadingText'));
+                }
                 $submitBtn.button('loading');
                 
                 var method = $form.attr('method');
