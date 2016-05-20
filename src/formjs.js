@@ -19,7 +19,8 @@
                 removeFormAfterSuccess: false,
                 resetFormAfterSuccess: false,
                 onFieldFocusRemoveError: true,
-                validateBeforeSubmit: false
+                validateBeforeSubmit: false,
+                loadingText: '<i class="fa fa-spin fa-spinner fa-fw"></i> Please wait...'
             };
             
             var $form = null;
@@ -62,13 +63,6 @@
                     
                     return $instance['event_' + $(this).attr('data-event')]($(this));
                 });
-                /*
-                $this.find('.event-binder').click(function(e){
-                    e.preventDefault();
-                    
-                    return $instance['event_' + $(this).attr('data-event')]($(this));
-                });
-                */
             };
             
             this.bindResetButton = function(){
@@ -157,6 +151,7 @@
             };
             
             this.sendPost = function(){
+                $submitBtn.attr('data-loading-text',this.getConfig('loadingText'));
                 $submitBtn.button('loading');
                 
                 var method = $form.attr('method');
