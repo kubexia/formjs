@@ -172,12 +172,11 @@
                             $instance.addErrors($instance.getResponse('errors'));
                         }
                         else{
-                            if($instance.getResponse('message')){
-                                $instance.addMessage();
-                            }
-                            
                             if($instance.getResponse('data')){
                                 $instance.handleResponse();
+                            }
+                            else{
+                                $instance.addMessage();
                             }
                         }
                         
@@ -208,6 +207,10 @@
             
             this.getResponseData = function(name){
                 return ($response.data[name] !== undefined ? $response.data[name] : null);
+            };
+            
+            this.hasResponseData = function(name){
+                return ($response.data[name] !== undefined ? true : false);
             };
             
             this.getResponseErrors = function(){
@@ -280,45 +283,7 @@
             };
             
             this.addMessage = function(){
-                $form.find(".notification-message").remove();
-                if(!$form.find('.form-js-notification-holder').is('*')){
-                    $form.prepend('<div class="form-js-notification-holder"></div>');
-                }
-                var notificationHolder = $form.find('.form-js-notification-holder');
-                var messageType = this.getResponseMessage('type');
-                
-                if(this.getResponseMessage('text')){
-                    var messageText = this.getResponseMessage('text');
-                    
-                    switch(messageType){
-                        case "success":
-                            notificationHolder.html('<div class="notification-message alert alert-success text-center"><i class="fa fa-check fa-fw"></i> '+messageText+'</div>');
-                            break;
-
-                        case "warning":
-                            notificationHolder.html('<div class="notification-message alert alert-warning text-center">'+messageText+'</div>');
-                            break;
-
-                        case "danger":
-                            notificationHolder.html('<div class="notification-message alert alert-danger text-center">'+messageText+'</div>');
-                            break;
-
-                        case "info":
-                            notificationHolder.html('<div class="notification-message alert alert-info text-center">'+messageText+'</div>');
-                            break;
-
-                        default:
-                            notificationHolder.html('<div class="notification-message">'+messageText+'</div>');
-                            break;
-                    }
-                }
-                else{
-                    if(this.getResponse('message')){
-                        var messageText = this.getResponse('message');
-                        notificationHolder.html('<div class="notification-message">'+messageText+'</div>');
-                    }
-                }
-                
+                this.addMessageNotification();
                 var delay = (this.getResponseMessage('delay') ? this.getResponseMessage('delay') : this.getConfig('messageNotificationDelay'));
                 var redirectTo = (this.getResponseMessage('redirect_to') ? this.getResponseMessage('redirect_to') : false);
                 if(redirectTo){
@@ -360,21 +325,17 @@
             };
             
             this.handleResponse = function(){
-                var delay = (this.getResponseData('delay') ? this.getResponseData('delay') : this.getConfig('messageNotificationDelay'));
+                this.addMessageNotification();
+                var delay = (this.hasResponseData('delay') ? this.getResponseData('delay') : 0);
                 var redirectTo = (this.getResponseData('redirect_to') ? this.getResponseData('redirect_to') : false);
                 if(redirectTo){
                     $submitBtn.remove();
                 }
                 
                 if(redirectTo){
-                    if(delay === false){
+                    setTimeout(function(){
                         window.location.href = redirectTo;
-                    }
-                    else{
-                        setInterval(function(){
-                            window.location.href = redirectTo;
-                        },delay);
-                    }
+                    },delay);
                 }
                 
                 var hideFormAfterSuccess = (this.getResponseData('hide_form') ? this.getResponseData('hide_form') : this.getConfig('hideFormAfterSuccess'));
@@ -401,6 +362,50 @@
                 
                 if($callbacks['onSuccess'] !== undefined){
                     $callbacks['onSuccess']($instance,$form,$response);
+                }
+            };
+            
+            this.addMessageNotification = function(){
+                if(!this.getResponse('message')){
+                    return false;
+                }
+                $form.find(".notification-message").remove();
+                if(!$form.find('.form-js-notification-holder').is('*')){
+                    $form.prepend('<div class="form-js-notification-holder"></div>');
+                }
+                var notificationHolder = $form.find('.form-js-notification-holder');
+                var messageType = this.getResponseMessage('type');
+                
+                if(this.getResponseMessage('text')){
+                    var messageText = this.getResponseMessage('text');
+                    
+                    switch(messageType){
+                        case "success":
+                            notificationHolder.html('<div class="notification-message alert alert-success text-center"><i class="fa fa-check fa-fw"></i> '+messageText+'</div>');
+                            break;
+
+                        case "warning":
+                            notificationHolder.html('<div class="notification-message alert alert-warning text-center">'+messageText+'</div>');
+                            break;
+
+                        case "danger":
+                            notificationHolder.html('<div class="notification-message alert alert-danger text-center">'+messageText+'</div>');
+                            break;
+
+                        case "info":
+                            notificationHolder.html('<div class="notification-message alert alert-info text-center">'+messageText+'</div>');
+                            break;
+
+                        default:
+                            notificationHolder.html('<div class="notification-message">'+messageText+'</div>');
+                            break;
+                    }
+                }
+                else{
+                    if(this.getResponse('message')){
+                        var messageText = this.getResponse('message');
+                        notificationHolder.html('<div class="notification-message">'+messageText+'</div>');
+                    }
                 }
             };
             
