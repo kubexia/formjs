@@ -1,5 +1,8 @@
 {
   "name" : "kubexia-formjs",
   "main" : "form.js",
-  "ignore": []
+  "ignore": [
+      "*",
+      "!src/*"
+  ]
 }

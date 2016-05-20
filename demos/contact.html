@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>FormJS - Contact Form</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css">
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+        <div class="container">  
+            <div class="panel panel-default">
+                <div class="panel-heading"><h3>Contact form</h3></div>
+                <div class="panel-body">
+                    <form action="submit.php?action=contact" class="formjs" method="POST" data-setup='{"onSuccess": "doSomething", "onError": "doSomethingElse"}'>
+                        <div class="form-js-notification-holder"></div>
+                        <div class="form-group first_name">
+                            <label class="control-label">First name<span class="text-danger">*</span></label>
+                            <input class="form-control" type="text" name="first_name" value="" placeholder="enter your first name" data-validate="required">
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label">Last name<span class="text-danger">*</span></label>
+                            <input class="form-control" type="text" name="last_name" value="" placeholder="enter your last name" data-validate="required">
+                            <div class="formjs-custom-message last_name"></div>
+                        </div>
+                        <div class="form-group phone">
+                            <label class="control-label">Phone number</label>
+                            <input class="form-control" type="text" name="phone" value="" placeholder="enter your phone">
+                        </div>
+                        <div class="form-group">
+                            <button type="button" class="btn btn-primary btn-submit-form event-binder" data-event="submitForm" data-loading-text='<i class="fa fa-spin fa-spinner fa-fw"></i> Please wait...'><i class="fa fa-check fa-fw"></i> Submit</button>
+                            <button type="button" class="btn btn-default btn-reset-form event-binder hide" data-event="resetForm"><i class="fa fa-times fa-fw"></i> Reset</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="panel panel-default">
+                <div class="panel-heading"><h3>Contact form</h3></div>
+                <div class="panel-body">
+                    <form action="submit.php?action=contact" class="formjs" method="POST">
+                        <div class="form-js-notification-holder"></div>
+                        <div class="form-group first_name">
+                            <label class="control-label">First name<span class="text-danger">*</span></label>
+                            <input class="form-control" type="text" name="first_name" value="" placeholder="enter your first name">
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label">Last name<span class="text-danger">*</span></label>
+                            <input class="form-control" type="text" name="last_name" value="" placeholder="enter your last name">
+                            <div class="formjs-custom-message last_name"></div>
+                        </div>
+                        <div class="form-group phone">
+                            <label class="control-label">Phone number</label>
+                            <input class="form-control" type="text" name="phone" value="" placeholder="enter your phone">
+                        </div>
+                        <div class="form-group">
+                            <button type="button" class="btn btn-primary btn-submit-form event-binder" data-event="submitForm" data-loading-text='<i class="fa fa-spin fa-spinner fa-fw"></i> Please wait...'><i class="fa fa-check fa-fw"></i> Submit</button>
+                            <button type="button" class="btn btn-default btn-reset-form event-binder hide" data-event="resetForm"><i class="fa fa-times fa-fw"></i> Reset</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.3/jquery.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+        <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+        <script type="text/javascript" src="../src/formjs.js"></script>
+        <script type="text/javascript" src="../src/validations/formjs.en.js"></script>
+        <script type="text/javascript">
+            $(document).ready(function(){
+                $('.formjs').formJS({
+                    messageNotificationDelay: 1000,
+                    hideFormAfterSuccess: false,
+                    removeFormAfterSuccess: false,
+                    resetFormAfterSuccess: false,
+                    onFieldFocusRemoveError: true,
+                    validateBeforeSubmit: true
+                })
+                
+                .validateBeforeSubmit({
+                    /*
+                    'first_name': 'required',
+                    'last_name': 'required',
+                    */
+                },{
+                    language: 'en',
+                    fallbackLanguage: 'en',
+                    map: {
+                        'en': {
+                            'first_name': 'First name',
+                            'last_name': 'Last name'
+                        }
+                    }
+                })
+                .onSuccess(function($instance,form,response){
+                    //do something after success
+                })
+                .onError(function($instance,form,response){
+                    //do something after error
+                });
+            });
+            
+            function doSomething(){
+                //alert('do something');
+            }
+            function doSomethingElse(){
+                //alert('do something else');
+            }
+        </script>
+    </body>
+</html>
