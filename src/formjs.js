@@ -172,7 +172,13 @@
                             $instance.addErrors($instance.getResponse('errors'));
                         }
                         else{
-                            $instance.addMessage();
+                            if($instance.getResponse('message')){
+                                $instance.addMessage();
+                            }
+                            
+                            if($instance.getResponse('data')){
+                                $instance.handleResponse();
+                            }
                         }
                         
                         $submitBtn.button('reset');
@@ -275,6 +281,9 @@
             
             this.addMessage = function(){
                 $form.find(".notification-message").remove();
+                if(!$form.find('.form-js-notification-holder').is('*')){
+                    $form.prepend('<div class="form-js-notification-holder"></div>');
+                }
                 var notificationHolder = $form.find('.form-js-notification-holder');
                 var messageType = this.getResponseMessage('type');
                 
@@ -319,8 +328,7 @@
                 $form.find(".notification-message").delay(delay).fadeOut('slow',function(){
                     $(this).remove();
                     if(redirectTo){
-                        window.location.href = this.getResponseMessage('redirect_to');
-                        return false;
+                        window.location.href = redirectTo;
                     }
                 });
                 
@@ -335,6 +343,46 @@
                 }
                 
                 var resetFormAfterSuccess = (this.getResponseMessage('reset_form') ? this.getResponseMessage('reset_form') : this.getConfig('resetFormAfterSuccess'));
+                if(resetFormAfterSuccess){
+                    this.resetForm($form);
+                }
+                
+                if($config.formSetup.onSuccess !== undefined){
+                    var fn = window[$config.formSetup.onSuccess];
+                    if (typeof fn === "function"){
+                        return fn($instance,$form,$response);
+                    }
+                }
+                
+                if($callbacks['onSuccess'] !== undefined){
+                    $callbacks['onSuccess']($instance,$form,$response);
+                }
+            };
+            
+            this.handleResponse = function(){
+                var delay = (this.getResponseData('delay') ? this.getResponseData('delay') : this.getConfig('messageNotificationDelay'));
+                var redirectTo = (this.getResponseData('redirect_to') ? this.getResponseData('redirect_to') : false);
+                if(redirectTo){
+                    $submitBtn.remove();
+                }
+                
+                if(redirectTo){
+                    setInterval(function(){
+                        window.location.href = redirectTo;
+                    },delay);
+                }
+                
+                var hideFormAfterSuccess = (this.getResponseData('hide_form') ? this.getResponseData('hide_form') : this.getConfig('hideFormAfterSuccess'));
+                if(hideFormAfterSuccess){
+                    $form.addClass('hide');
+                }
+                
+                var removeFormAfterSuccess = (this.getResponseData('remove_form') ? this.getResponseData('remove_form') : this.getConfig('removeFormAfterSuccess'));
+                if(removeFormAfterSuccess){
+                    $form.remove();
+                }
+                
+                var resetFormAfterSuccess = (this.getResponseData('reset_form') ? this.getResponseData('reset_form') : this.getConfig('resetFormAfterSuccess'));
                 if(resetFormAfterSuccess){
                     this.resetForm($form);
                 }
