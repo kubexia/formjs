@@ -429,7 +429,10 @@
              * EVENTS
              */
             this.onInit = function(cb){
-                cb($instance,$form);
+                $.each($($handler),function(){
+                    cb($instance,$(this));
+                });
+                
                 return this;
             };
             
