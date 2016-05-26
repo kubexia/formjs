@@ -58,7 +58,7 @@
             };
             
             this.bindEvents = function(){
-                $(document).on('click','.event-binder',function(e){
+                $(document).on('click','.formjs-event-binder',function(e){
                     e.preventDefault();
                     
                     return $instance['event_' + $(this).attr('data-event')]($(this));
@@ -372,10 +372,10 @@
                     return false;
                 }
                 $form.find(".notification-message").remove();
-                if(!$form.find('.form-js-notification-holder').is('*')){
-                    $form.prepend('<div class="form-js-notification-holder"></div>');
+                if(!$form.find('.formjs-notification-holder').is('*')){
+                    $form.prepend('<div class="formjs-notification-holder"></div>');
                 }
-                var notificationHolder = $form.find('.form-js-notification-holder');
+                var notificationHolder = $form.find('.formjs-notification-holder');
                 var messageType = this.getResponseMessage('type');
                 
                 if(this.getResponseMessage('text')){
