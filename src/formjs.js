@@ -150,6 +150,12 @@
                 btn.addClass('hide');
             };
             
+            this.event_clearErrorsModalForm = function(btn){
+                $modal = btn.closest('.formjs-modal');
+                $form = $modal.find($handler);
+                this.clearErrors($form);
+            };
+            
             this.sendPost = function(){
                 if($submitBtn.attr('data-loading-text') === undefined){
                     $submitBtn.attr('data-loading-text',this.getConfig('loadingText'));
