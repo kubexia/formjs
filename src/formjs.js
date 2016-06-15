@@ -361,6 +361,10 @@
                     this.resetForm($form);
                 }
                 
+                $form.find(".notification-message").delay(delay).fadeOut('slow',function(){
+                    $(this).remove();
+                });
+                
                 if($config.formSetup.onSuccess !== undefined){
                     var fn = window[$config.formSetup.onSuccess];
                     if (typeof fn === "function"){
