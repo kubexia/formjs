@@ -7,7 +7,7 @@
         }
         var $config = config;
         
-        var $handler = this.selector;
+        var $handler = this;
         
         return new function(){
             
