@@ -306,13 +306,25 @@
                 });
                 
                 var hideFormAfterSuccess = (this.getResponseMessage('hide_form') ? this.getResponseMessage('hide_form') : this.getConfig('hideFormAfterSuccess'));
+                var hideFormAfterSuccessText = (this.getResponseMessage('hide_form').text !== undefined ? this.getResponseMessage('hide_form').text : false);
                 if(hideFormAfterSuccess){
-                    $form.addClass('hide');
+                    setTimeout(function(){
+                        if(hideFormAfterSuccessText){
+                            $form.after(hideFormAfterSuccessText);
+                        }
+                        $form.addClass('hide');
+                    },delay);
                 }
                 
                 var removeFormAfterSuccess = (this.getResponseMessage('remove_form') ? this.getResponseMessage('remove_form') : this.getConfig('removeFormAfterSuccess'));
+                var removeFormAfterSuccessText = (this.getResponseMessage('remove_form').text !== undefined ? this.getResponseMessage('remove_form').text : false);
                 if(removeFormAfterSuccess){
-                    $form.remove();
+                    setTimeout(function(){
+                        if(removeFormAfterSuccessText){
+                            $form.after(removeFormAfterSuccessText);
+                        }
+                        $form.remove();
+                    },delay);
                 }
                 
                 var resetFormAfterSuccess = (this.getResponseMessage('reset_form') ? this.getResponseMessage('reset_form') : this.getConfig('resetFormAfterSuccess'));
