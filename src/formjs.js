@@ -295,7 +295,7 @@
                 var delay = (this.getResponseMessage('delay') ? this.getResponseMessage('delay') : this.getConfig('messageNotificationDelay'));
                 var redirectTo = (this.getResponseMessage('redirect_to') ? this.getResponseMessage('redirect_to') : false);
                 if(redirectTo){
-                    $submitBtn.remove();
+                    //$submitBtn.remove();
                 }
                 
                 $form.find(".notification-message").delay(delay).fadeOut('slow',function(){
