@@ -45,6 +45,7 @@
                 
                 this.bindEvents();
                 this.bindResetButton();
+                this.enableSelect2();
                 
                 return this;
             };
@@ -84,6 +85,50 @@
                     else{
                         btnReset.addClass('hide');
                     }
+                });
+            };
+            
+            this.enableSelect2 = function(){
+                var sel2 = function(_this){
+                    _this.select2({
+                        placeholder: _this.attr('placeholder'),
+                        allowClear: (_this.attr('data-allow-clear') ? true : false),
+                        tags: (_this.attr('data-with-tags') ? true : false),
+                        maximumSelectionLength: (_this.attr('data-max-tags') ? _this.attr('data-max-tags') : 0)
+                    });
+
+                    if(_this.attr('data-name') !== undefined && _this.attr('multiple') === 'multiple'){
+                        var selected = _this.attr('data-selected').split(',');
+                        var id = 'selectedMultiple_'+_this.attr('data-name');
+
+                        _this.after('<input type="hidden" id="'+id+'" name="'+_this.attr('data-name')+'" value="'+_this.attr('data-selected')+'">');
+                        if(_this.attr('data-selected').length > 0){
+                            _this.val(selected).change();
+                        }
+
+                        _this.on('change',function(item){
+                            $('#'+id).val($(this).val());
+                        });
+                    }
+                    else{
+                        if(_this.attr('data-selected') !== undefined){
+                            var id = 'selectedSingle_'+_this.attr('data-name');
+                            _this.after('<input type="hidden" id="'+id+'" name="'+_this.attr('data-name')+'" value="'+_this.attr('data-selected')+'">');
+
+                            var selected = _this.attr('data-selected').split(',');
+                            _this.val(selected).change();
+
+                            _this.on('change',function(item){
+                                $('#'+id).val($(this).val());
+                            });
+                        }
+                    }
+                    $('.select2').css('width','100%');
+                }
+                
+                $.each($(".sel2"),function(){
+                    var _this = $(this);
+                    sel2(_this);
                 });
             };
             
