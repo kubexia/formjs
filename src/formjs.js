@@ -96,7 +96,10 @@
                         tags: (_this.attr('data-with-tags') ? true : false),
                         maximumSelectionLength: (_this.attr('data-max-tags') ? _this.attr('data-max-tags') : 0)
                     });
-
+                    if(_this.attr('multiple') === 'multiple'){
+                        _this.attr('data-name', _this.attr('name'));
+                        _this.removeAttr('name');
+                    }
                     if(_this.attr('data-name') !== undefined && _this.attr('multiple') === 'multiple'){
                         var selected = _this.attr('data-selected').split(',');
                         var id = 'selectedMultiple_'+_this.attr('data-name');
@@ -112,9 +115,11 @@
                     }
                     else{
                         if(_this.attr('data-selected') !== undefined){
-                            var id = 'selectedSingle_'+_this.attr('data-name');
-                            _this.after('<input type="hidden" id="'+id+'" name="'+_this.attr('data-name')+'" value="'+_this.attr('data-selected')+'">');
-
+                            if(_this.attr('data-name') !== undefined){
+                                var id = 'selectedSingle_'+_this.attr('data-name');
+                                _this.after('<input type="hidden" id="'+id+'" name="'+_this.attr('data-name')+'" value="'+_this.attr('data-selected')+'">');
+                            }
+                            
                             var selected = _this.attr('data-selected').split(',');
                             _this.val(selected).change();
 
