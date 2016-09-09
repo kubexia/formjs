@@ -366,7 +366,7 @@
                 });
                 
                 var hideFormAfterSuccess = (this.getResponseMessage('hide_form') ? this.getResponseMessage('hide_form') : this.getConfig('hideFormAfterSuccess'));
-                var hideFormAfterSuccessText = (this.getResponseMessage('hide_form').text !== undefined ? this.getResponseMessage('hide_form').text : false);
+                var hideFormAfterSuccessText = (this.getResponseMessage('hide_form') && this.getResponseMessage('hide_form').text !== undefined ? this.getResponseMessage('hide_form').text : false);
                 if(hideFormAfterSuccess){
                     setTimeout(function(){
                         if(hideFormAfterSuccessText){
@@ -377,7 +377,7 @@
                 }
                 
                 var removeFormAfterSuccess = (this.getResponseMessage('remove_form') ? this.getResponseMessage('remove_form') : this.getConfig('removeFormAfterSuccess'));
-                var removeFormAfterSuccessText = (this.getResponseMessage('remove_form').text !== undefined ? this.getResponseMessage('remove_form').text : false);
+                var removeFormAfterSuccessText = (this.getResponseMessage('remove_form') && this.getResponseMessage('remove_form').text !== undefined ? this.getResponseMessage('remove_form').text : false);
                 if(removeFormAfterSuccess){
                     setTimeout(function(){
                         if(removeFormAfterSuccessText){
