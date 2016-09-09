@@ -45,6 +45,7 @@
                 
                 this.bindEvents();
                 this.bindResetButton();
+                this.fixAutocompleteOff();
                 this.enableSelect2();
                 
                 return this;
@@ -84,6 +85,15 @@
                     }
                     else{
                         btnReset.addClass('hide');
+                    }
+                });
+            };
+            
+            this.fixAutocompleteOff = function(){
+                var items = $($handler).find('input[autocomplete="off"]');
+                $.each(items,function(){
+                    if($(this).attr('value') === ''){
+                        $(this).val('');
                     }
                 });
             };
