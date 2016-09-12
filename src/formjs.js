@@ -309,6 +309,8 @@
                 if($callbacks['onError'] !== undefined){
                     return $callbacks['onError']($instance,$form,$response);
                 }
+                
+                $submitBtn.button('reset');
             };
             
             this.addError = function(field,item){
@@ -410,7 +412,10 @@
                 var delay = (this.hasResponseData('delay') ? this.getResponseData('delay') : 0);
                 var redirectTo = (this.getResponseData('redirect_to') ? this.getResponseData('redirect_to') : false);
                 if(redirectTo){
-                    $submitBtn.remove();
+                    //$submitBtn.remove();
+                }
+                else{
+                    $submitBtn.button('reset');
                 }
                 
                 if(redirectTo){
