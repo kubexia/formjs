@@ -47,6 +47,7 @@
                 this.bindResetButton();
                 this.fixAutocompleteOff();
                 this.enableSelect2();
+                this.enableDatePicker();
                 
                 return this;
             };
@@ -145,6 +146,19 @@
                     var _this = $(this);
                     sel2(_this);
                 });
+            };
+            
+            this.enableDatePicker = function(){
+                if($(".pickdate").is('*')){
+                    $.each($('.pickdate'), function(){
+                        var _this = $(this);
+                        $(this).datepicker({
+                            format: (_this.data('format') ? _this.data('format') : 'mm/dd/yyyy'),
+                            autoclose: true,
+                            todayHighlight: true
+                        });
+                    });
+                }
             };
             
             this.getConfig = function(name){
