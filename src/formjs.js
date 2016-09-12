@@ -247,8 +247,6 @@
                                 $instance.addMessage();
                             }
                         }
-                        
-                        $submitBtn.button('reset');
                     },
                     error: function(e){
                         console.log(e.responseText);
@@ -356,6 +354,9 @@
                 var redirectTo = (this.getResponseMessage('redirect_to') ? this.getResponseMessage('redirect_to') : false);
                 if(redirectTo){
                     //$submitBtn.remove();
+                }
+                else{
+                    $submitBtn.button('reset');
                 }
                 
                 $form.find(".notification-message").delay(delay).fadeOut('slow',function(){
