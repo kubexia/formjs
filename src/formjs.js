@@ -420,12 +420,12 @@
                 if($config.formSetup.onSuccess !== undefined){
                     var fn = window[$config.formSetup.onSuccess];
                     if (typeof fn === "function"){
-                        return fn($instance,$form,$response);
+                        return fn($instance,$form,$response, $submitBtn);
                     }
                 }
                 
                 if($callbacks['onSuccess'] !== undefined){
-                    $callbacks['onSuccess']($instance,$form,$response);
+                    $callbacks['onSuccess']($instance,$form,$response, $submitBtn);
                 }
             };
             
@@ -468,12 +468,12 @@
                 if($config.formSetup.onSuccess !== undefined){
                     var fn = window[$config.formSetup.onSuccess];
                     if (typeof fn === "function"){
-                        return fn($instance,$form,$response);
+                        return fn($instance,$form,$response, $submitBtn);
                     }
                 }
                 
                 if($callbacks['onSuccess'] !== undefined){
-                    $callbacks['onSuccess']($instance,$form,$response);
+                    $callbacks['onSuccess']($instance,$form,$response,$submitBtn);
                 }
             };
             
