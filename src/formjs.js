@@ -61,11 +61,19 @@
             };
             
             this.bindEvents = function(){
-                $(document).on('click','.formjs-event-binder',function(e){
-                    e.preventDefault();
-                    
-                    return $instance['event_' + $(this).attr('data-event')]($(this));
-                });
+                var formJsModal = $this.closest('.formjs-modal');
+                if(formJsModal.is('*')){
+                    formJsModal.find('.formjs-event-binder').on('click',function(e){
+                        e.preventDefault();
+                        return $instance['event_' + $(this).attr('data-event')]($(this));
+                    });
+                }
+                else{
+                    $this.find('.formjs-event-binder').on('click',function(e){
+                        e.preventDefault();
+                        return $instance['event_' + $(this).attr('data-event')]($(this));
+                    });
+                }
             };
             
             this.bindResetButton = function(){
@@ -298,7 +306,7 @@
             };
             
             this.getResponseMessage = function(name){
-                return ($response.message[name] !== undefined ? $response.message[name] : null);
+                return ($response.message !== null && $response.message[name] !== undefined ? $response.message[name] : null);
             };
             
             this.addErrors = function(errors){
