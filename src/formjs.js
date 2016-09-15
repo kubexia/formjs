@@ -380,7 +380,7 @@
             this.addError = function(field,item){
                 field = field.replace('[','\\[');
                 field = field.replace(']','\\]');
-                    
+                
                 var formgroup = $form.find('.form-group.'+field);
                 if($(formgroup).is('*')){
                     var inputgroup = $(formgroup).find('.input-group');
@@ -408,7 +408,8 @@
                 else{
                     var customDiv = $form.find('.formjs-custom-message.'+field);
                     if(customDiv.is('*')){
-                        customDiv.closest('.form-group').addClass('has-error');
+                        var fgroup = (customDiv.closest('.form-group-item').is('*') ? customDiv.closest('.form-group-item') : customDiv.closest('.form-group'));
+                        fgroup.addClass('has-error');
                         customDiv.append('<p class="text-danger formjs-error-message">'+item+'</p>');
                     }
                 }
@@ -574,7 +575,7 @@
             };
             
             this.clearElementErrors = function(el){
-                var holder = el.closest('.form-group');
+                var holder = (el.closest('.form-group-item').is('*') ? el.closest('.form-group-item') : el.closest('.form-group'));
                 holder.find('.formjs-error-message').remove();
                 holder.removeClass('has-error');
             };
