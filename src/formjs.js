@@ -238,6 +238,45 @@
                 this.clearErrors($form);
             };
             
+            this.event_itemDelete = function(btn){
+                var returnUrl = (btn.data('return-url') !== undefined && btn.data('return-url') !== '' ? btn.data('return-url') : document.location.href);
+                
+                if(btn.attr('data-loading-text') === undefined){
+                    btn.attr('data-loading-text',this.getConfig('loadingText'));
+                }
+                btn.button('loading');
+                
+                if(confirm(btn.data('message'))){
+                    $.ajax({
+                        type: "POST",
+                        url: btn.data('request-url'),
+                        dataType: 'json',
+                        data: {'_method': 'DELETE'},
+                        success: function(data){
+                            $instance.setResponse(data);
+                            
+                            if($instance.getResponseSuccess() === true){
+                                if(btn.data('callback-success') !== undefined){
+                                    var cb = window[object.data('callback-success')];
+                                    if (typeof cb === "function"){
+                                        return cb($instance,$form,data, btn);
+                                    }
+                                }
+                                else{
+                                    if($instance.getResponseData('redirect_to')){
+                                        returnUrl = $instance.getResponseData('redirect_to');
+                                    }
+                                    document.location.href = (returnUrl ? returnUrl : document.location.href);
+                                }
+                            }
+                        },
+                        error: function(xhr, textStatus, errorThrown){
+                            console.log(xhr.responseText);
+                        }
+                    });
+                }
+            };
+            
             this.sendPost = function(){
                 if($submitBtn.attr('data-loading-text') === undefined){
                     $submitBtn.attr('data-loading-text',this.getConfig('loadingText'));
@@ -294,11 +333,11 @@
             };
             
             this.getResponseData = function(name){
-                return ($response.data[name] !== undefined ? $response.data[name] : null);
+                return ($response.data !== null && $response.data[name] !== undefined ? $response.data[name] : null);
             };
             
             this.hasResponseData = function(name){
-                return ($response.data[name] !== undefined ? true : false);
+                return ($response.data !== null && $response.data[name] !== undefined ? true : false);
             };
             
             this.getResponseErrors = function(){
