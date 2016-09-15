@@ -275,6 +275,9 @@
                         }
                     });
                 }
+                else{
+                    btn.button('reset');
+                }
             };
             
             this.sendPost = function(){
