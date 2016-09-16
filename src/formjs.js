@@ -61,19 +61,10 @@
             };
             
             this.bindEvents = function(){
-                var formJsModal = $this.closest('.formjs-modal');
-                if(formJsModal.is('*')){
-                    formJsModal.find('.formjs-event-binder').on('click',function(e){
-                        e.preventDefault();
-                        return $instance['event_' + $(this).attr('data-event')]($(this));
-                    });
-                }
-                else{
-                    $this.find('.formjs-event-binder').on('click',function(e){
-                        e.preventDefault();
-                        return $instance['event_' + $(this).attr('data-event')]($(this));
-                    });
-                }
+                $(document).on('click','.formjs-event-binder', function(e){
+                    e.preventDefault();
+                    return $instance['event_' + $(this).attr('data-event')]($(this));
+                });
             };
             
             this.bindResetButton = function(){
