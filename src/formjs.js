@@ -164,9 +164,95 @@
             };
             
             this.enableFileUploads = function(){
-                $.each($handler.find('.file-upload-input'), function(){
+                var input = $handler.find('.file-upload-input');
+                if(!input.is('*')){
+                    return false;
+                }
+                var filesList = [];
+                var paramNames = [];
+                input.fileupload({
+                    dataType: 'json',
+                    autoUpload: false,
+                    disableExifThumbnail: true,
+                    replaceFileInput: false,
+                    success: function(data){
+                        var form = input.closest($handler);
+                        var btn = form.find('button[data-event="submitForm"]');
+                        $instance.setResponse(data);
+
+                        if($instance.getResponseSuccess() === false){
+                            $instance.addErrors(form, btn, $instance.getResponse('errors'));
+                        }
+                        else{
+                            if($instance.getResponse('data')){
+                                $instance.handleResponse(form, btn);
+                            }
+                            else{
+                                $instance.addMessage(form, btn);
+                            }
+                        }
+                    },
+                    error: function(e){
+                        console.log(e.responseText);
+                    }
+                }).on('fileuploadadd', function (e, data) {
+                    var object = $(this);
+                    filesList.push(data.files[0]);
+                    paramNames.push(e.delegatedEvent.target.name);
                     
+                    var form = $(this).closest($handler);
+                    var btn = form.find('button[data-event="submitForm"]');
+                    
+                    $instance.handleImages(object, data.files[0]);
+                    
+                    btn.off('click').on('click', function (e) {
+                        e.preventDefault();
+                        data.files = filesList;
+                        data.originalFiles = filesList;
+                        data.paramName = paramNames;
+                        data.submit();
+                    });
                 });
+            };
+            
+            this.handleImages = function(object, image){
+                var fileUploadBox = object.closest('.file-upload-box');
+                var input = fileUploadBox.find('.file-upload-input');
+                var imagePreviewBox = fileUploadBox.find('.image-upload-preview');
+
+                if(imagePreviewBox.is('*')){
+                    var btnDeleteImage = fileUploadBox.find('.image-upload-remove');
+                    imagePreviewBox.removeClass('hide');
+                    btnDeleteImage.removeClass('hide');
+                    imagePreviewBox.html(this.getConfig('loadingText'));
+                    
+                    loadImage(
+                        image,
+                        function (img) {
+                            imagePreviewBox.html(img);
+                            var imageContainer = imagePreviewBox.find('img');
+                            if(!input.attr('data-max-width')){
+                                imageContainer.removeAttr('width');
+                                imageContainer.removeAttr('height');
+                                imageContainer.addClass('img-responsive');
+                            }
+                        },
+                        {maxWidth: input.attr('data-max-width')} // Options
+                    );
+
+                    btnDeleteImage.click(function(e){
+                        e.preventDefault();
+                        if(input.attr('data-image-delete-url') === '#' || input.attr('data-image-delete-url') === undefined){
+                            imagePreviewBox.html('');
+                        }
+                        else{
+                            //todo: request delete image url
+                        }
+                        
+                        imagePreviewBox.addClass('hide');
+                        $(this).addClass('hide');
+                    });
+                }
             };
             
             this.getConfig = function(name){
@@ -278,43 +364,49 @@
             };
             
             this.sendPost = function(form, btn){
-                if(btn.attr('data-loading-text') === undefined){
-                    btn.attr('data-loading-text',this.getConfig('loadingText'));
-                }
-                btn.button('loading');
-                
-                var method = form.attr('method');
-                var action = form.attr('action');
-                var data = form.serialize();
-                
-                this.clearErrors(form);
-                
-                $.ajax({
-                    type: method,
-                    url: action,
-                    dataType: 'json',
-                    data: data,
-                    success: function(data){
-                        $instance.setResponse(data);
-                        
-                        if($instance.getResponseSuccess() === false){
-                            $instance.addErrors(form, btn, $instance.getResponse('errors'));
-                        }
-                        else{
-                            if($instance.getResponse('data')){
-                                $instance.handleResponse(form, btn);
+                form.on('submit',function(e){
+                    e.preventDefault();
+                    if(btn.attr('data-loading-text') === undefined){
+                        btn.attr('data-loading-text',$instance.getConfig('loadingText'));
+                    }
+                    btn.button('loading');
+
+                    var method = form.attr('method');
+                    var action = form.attr('action');
+                    var data = form.serialize();
+                    
+                    $instance.clearErrors(form);
+
+                    $.ajax({
+                        type: method,
+                        url: action,
+                        dataType: 'json',
+                        data: data,
+                        success: function(data){
+                            $instance.setResponse(data);
+
+                            if($instance.getResponseSuccess() === false){
+                                $instance.addErrors(form, btn, $instance.getResponse('errors'));
                             }
                             else{
-                                $instance.addMessage(form, btn);
+                                if($instance.getResponse('data')){
+                                    $instance.handleResponse(form, btn);
+                                }
+                                else{
+                                    $instance.addMessage(form, btn);
+                                }
                             }
+                        },
+                        error: function(e){
+                            console.log(e.responseText);
+                            form.append('ERROR: something went really wrong...');
+                            btn.button('reset');
                         }
-                    },
-                    error: function(e){
-                        console.log(e.responseText);
-                        form.append('ERROR: something went really wrong...');
-                        btn.button('reset');
-                    }
+                    });
                 });
+                
+                form.submit();
+                form.unbind('submit');
             }
             
             this.setResponse = function(r){
@@ -360,7 +452,7 @@
                     }
                 });
                 
-                if($config.formSetup.onError !== undefined){
+                if($config.formSetup !== undefined && $config.formSetup.onError !== undefined){
                     var fn = window[$config.formSetup.onError];
                     if (typeof fn === "function"){
                         return fn($instance,form,$response);
