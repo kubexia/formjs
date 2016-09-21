@@ -1,6 +1,5 @@
 (function( $ ) {
     $.fn.formJS = function(config) {
-        var $this = $(this);
         
         if(config === undefined){
             config = {};
@@ -23,12 +22,6 @@
                 loadingText: '<i class="fa fa-spin fa-spinner fa-fw"></i> Please wait...'
             };
             
-            var $form = null;
-            
-            var $modal = null;
-            
-            var $submitBtn = null;
-            
             var $response = {
                 data: null,
                 message: null,
@@ -41,19 +34,20 @@
             var $validatorErrors = {};
             
             this.init = function(){
-                this.setDefaultConfigs($defaultConfigs);
+                this.setDefaultConfigs();
                 
                 this.bindEvents();
                 this.bindResetButton();
                 this.fixAutocompleteOff();
                 this.enableSelect2();
                 this.enableDatePicker();
+                this.enableFileUploads();
                 
                 return this;
             };
             
-            this.setDefaultConfigs = function(items){
-                $.each(items,function(k,v){
+            this.setDefaultConfigs = function(){
+                $.each($defaultConfigs,function(k,v){
                     if($config[k] === undefined){
                         $config[k] = v;
                     }
@@ -61,14 +55,21 @@
             };
             
             this.bindEvents = function(){
+                $('.formjs-event-binder').click(function(e){
+                    e.preventDefault();
+                    return $instance['event_' + $(this).attr('data-event')]($(this));
+                });
+                
+                /*
                 $(document).on('click','.formjs-event-binder', function(e){
                     e.preventDefault();
                     return $instance['event_' + $(this).attr('data-event')]($(this));
                 });
+                */
             };
             
             this.bindResetButton = function(){
-                $('.form-control').keyup(function(){
+                $handler.find('.form-control').keyup(function(){
                     var form = $(this).closest($handler);
                     var btnReset = form.find('.btn-reset-form');
                     
@@ -141,33 +142,37 @@
                     $('.select2').css('width','100%');
                 }
                 
-                $.each($(".sel2"),function(){
+                $.each($handler.find(".sel2"),function(){
                     var _this = $(this);
                     sel2(_this);
                 });
             };
             
             this.enableDatePicker = function(){
-                if($(".pickdate").is('*')){
-                    $.each($('.pickdate'), function(){
-                        var _this = $(this);
-                        $(this).datepicker({
-                            format: (_this.data('format') ? _this.data('format') : 'mm/dd/yyyy'),
-                            autoclose: true,
-                            todayHighlight: true
-                        });
+                $.each($handler.find('.pickdate'), function(){
+                    var _this = $(this);
+                    $(this).datepicker({
+                        format: (_this.data('format') ? _this.data('format') : 'mm/dd/yyyy'),
+                        autoclose: true,
+                        todayHighlight: true
                     });
-                }
+                });
+            };
+            
+            this.enableFileUploads = function(){
+                $.each($handler.find('.file-upload-input'), function(){
+                    
+                });
             };
             
             this.getConfig = function(name){
                 return ($config[name] !== undefined ? $config[name] : null);
             };
             
-            this.submitForm = function(form){
+            this.submitForm = function(form, btn){
                 if(form.attr('data-setup') !== undefined){
                     $config.formSetup = {};
-                    $.each($.parseJSON($form.attr('data-setup')),function(key,val){
+                    $.each($.parseJSON(form.attr('data-setup')),function(key,val){
                         $config.formSetup[key] = val;
                     });
                 }
@@ -185,51 +190,48 @@
                 });
                 
                 if($config.validateBeforeSubmit === false){
-                    this.sendPost();
+                    this.sendPost(form, btn);
                 }
                 else{
                     if(this.validator()){
-                        this.sendPost();
+                        this.sendPost(form, btn);
                     }
                 }
             };
             
             this.event_submitForm = function(btn){
-                $form = btn.closest($handler);
-                $submitBtn = btn;
-                
-                this.submitForm($form);
+                var form = btn.closest($handler);
+                this.submitForm(form, btn);
             };
             
             this.event_submitModalForm = function(btn){
-                $modal = btn.closest('.formjs-modal');
-                $form = $modal.find($handler);
-                $submitBtn = btn;
-                
-                this.submitForm($form);
+                var modal = btn.closest('.formjs-modal');
+                var form = modal.find($handler);
+                this.submitForm(form, btn);
             };
             
             this.event_resetModalForm = function(btn){
-                $modal = btn.closest('.formjs-modal');
-                $form = $modal.find($handler);
-                this.resetForm($form);
-                this.clearErrors($form);
+                var modal = btn.closest('.formjs-modal');
+                var form = modal.find($handler);
+                this.resetForm(form);
+                this.clearErrors(form);
             };
             
             this.event_resetForm = function(btn){
-                $form = btn.closest($handler);
-                this.resetForm($form);
-                this.clearErrors($form);
+                var form = btn.closest($handler);
+                this.resetForm(form);
+                this.clearErrors(form);
                 btn.addClass('hide');
             };
             
             this.event_clearErrorsModalForm = function(btn){
-                $modal = btn.closest('.formjs-modal');
-                $form = $modal.find($handler);
-                this.clearErrors($form);
+                var modal = btn.closest('.formjs-modal');
+                var form = modal.find($handler);
+                this.clearErrors(form);
             };
             
             this.event_itemDelete = function(btn){
+                var form = btn.closest($handler);
                 var returnUrl = (btn.data('return-url') !== undefined && btn.data('return-url') !== '' ? btn.data('return-url') : document.location.href);
                 
                 if(btn.attr('data-loading-text') === undefined){
@@ -250,7 +252,7 @@
                                 if(btn.data('callback-success') !== undefined){
                                     var cb = window[object.data('callback-success')];
                                     if (typeof cb === "function"){
-                                        return cb($instance,$form,data, btn);
+                                        return cb($instance,form,data, btn);
                                     }
                                 }
                                 else{
@@ -271,17 +273,17 @@
                 }
             };
             
-            this.sendPost = function(){
-                if($submitBtn.attr('data-loading-text') === undefined){
-                    $submitBtn.attr('data-loading-text',this.getConfig('loadingText'));
+            this.sendPost = function(form, btn){
+                if(btn.attr('data-loading-text') === undefined){
+                    btn.attr('data-loading-text',this.getConfig('loadingText'));
                 }
-                $submitBtn.button('loading');
+                btn.button('loading');
                 
-                var method = $form.attr('method');
-                var action = $form.attr('action');
-                var data = $form.serialize();
+                var method = form.attr('method');
+                var action = form.attr('action');
+                var data = form.serialize();
                 
-                this.clearErrors($form);
+                this.clearErrors(form);
                 
                 $.ajax({
                     type: method,
@@ -292,21 +294,21 @@
                         $instance.setResponse(data);
                         
                         if($instance.getResponseSuccess() === false){
-                            $instance.addErrors($instance.getResponse('errors'));
+                            $instance.addErrors(form, btn, $instance.getResponse('errors'));
                         }
                         else{
                             if($instance.getResponse('data')){
-                                $instance.handleResponse();
+                                $instance.handleResponse(form, btn);
                             }
                             else{
-                                $instance.addMessage();
+                                $instance.addMessage(form, btn);
                             }
                         }
                     },
                     error: function(e){
                         console.log(e.responseText);
-                        $form.append('ERROR: something went really wrong...');
-                        $submitBtn.button('reset');
+                        form.append('ERROR: something went really wrong...');
+                        btn.button('reset');
                     }
                 });
             }
@@ -342,37 +344,37 @@
                 return ($response.message !== null && $response.message[name] !== undefined ? $response.message[name] : null);
             };
             
-            this.addErrors = function(errors){
+            this.addErrors = function(form, btn, errors){
                 $.each(errors,function(field,item){
                     if(item.message === undefined && item.code === undefined){
                         $.each(item,function(k,it){
-                            $instance.addError(field,it);
+                            $instance.addError(form, field,it);
                         });
                     }
                     else{
-                        $instance.addError(field,item);
+                        $instance.addError(form, field,item);
                     }
                 });
                 
                 if($config.formSetup.onError !== undefined){
                     var fn = window[$config.formSetup.onError];
                     if (typeof fn === "function"){
-                        return fn($instance,$form,$response);
+                        return fn($instance,form,$response);
                     }
                 }
                 
                 if($callbacks['onError'] !== undefined){
-                    return $callbacks['onError']($instance,$form,$response);
+                    return $callbacks['onError']($instance,form,$response);
                 }
                 
-                $submitBtn.button('reset');
+                btn.button('reset');
             };
             
-            this.addError = function(field,item){
+            this.addError = function(form, field,item){
                 field = field.replace('[','\\[');
                 field = field.replace(']','\\]');
                 
-                var formgroup = $form.find('.form-group.'+field);
+                var formgroup = form.find('.form-group.'+field);
                 if($(formgroup).is('*')){
                     var inputgroup = $(formgroup).find('.input-group');
 
@@ -397,7 +399,7 @@
                     }
                 }
                 else{
-                    var customDiv = $form.find('.formjs-custom-message.'+field);
+                    var customDiv = form.find('.formjs-custom-message.'+field);
                     if(customDiv.is('*')){
                         var fgroup = (customDiv.closest('.form-group-item').is('*') ? customDiv.closest('.form-group-item') : customDiv.closest('.form-group'));
                         fgroup.addClass('has-error');
@@ -406,18 +408,18 @@
                 }
             };
             
-            this.addMessage = function(){
-                this.addMessageNotification();
+            this.addMessage = function(form, btn){
+                this.addMessageNotification(form, btn);
                 var delay = (this.getResponseMessage('delay') ? this.getResponseMessage('delay') : this.getConfig('messageNotificationDelay'));
                 var redirectTo = (this.getResponseMessage('redirect_to') ? this.getResponseMessage('redirect_to') : false);
                 if(redirectTo){
-                    //$submitBtn.remove();
+                    //btn.remove();
                 }
                 else{
-                    $submitBtn.button('reset');
+                    btn.button('reset');
                 }
                 
-                $form.find(".notification-message").delay(delay).fadeOut('slow',function(){
+                form.find(".notification-message").delay(delay).fadeOut('slow',function(){
                     $(this).remove();
                     if(redirectTo){
                         window.location.href = redirectTo;
@@ -429,9 +431,12 @@
                 if(hideFormAfterSuccess){
                     setTimeout(function(){
                         if(hideFormAfterSuccessText){
-                            $form.after(hideFormAfterSuccessText);
+                            //form.after(hideFormAfterSuccessText);
+                            var formContainer = form.parent();
+                            formContainer.html(hideFormAfterSuccessText);
+                            formContainer.find('.formjs').formJS();
                         }
-                        $form.addClass('hide');
+                        form.addClass('hide');
                     },delay);
                 }
                 
@@ -440,38 +445,41 @@
                 if(removeFormAfterSuccess){
                     setTimeout(function(){
                         if(removeFormAfterSuccessText){
-                            $form.after(removeFormAfterSuccessText);
+                            //form.after(removeFormAfterSuccessText);
+                            var formContainer = form.parent();
+                            formContainer.html(removeFormAfterSuccessText);
+                            formContainer.find('.formjs').formJS();
                         }
-                        $form.remove();
+                        form.remove();
                     },delay);
                 }
                 
                 var resetFormAfterSuccess = (this.getResponseMessage('reset_form') ? this.getResponseMessage('reset_form') : this.getConfig('resetFormAfterSuccess'));
                 if(resetFormAfterSuccess){
-                    this.resetForm($form);
+                    this.resetForm(form);
                 }
                 
                 if($config.formSetup.onSuccess !== undefined){
                     var fn = window[$config.formSetup.onSuccess];
                     if (typeof fn === "function"){
-                        return fn($instance,$form,$response, $submitBtn);
+                        return fn($instance,form,$response, btn);
                     }
                 }
                 
                 if($callbacks['onSuccess'] !== undefined){
-                    $callbacks['onSuccess']($instance,$form,$response, $submitBtn);
+                    $callbacks['onSuccess']($instance,form,$response, btn);
                 }
             };
             
-            this.handleResponse = function(){
-                this.addMessageNotification();
+            this.handleResponse = function(form, btn){
+                this.addMessageNotification(form, btn);
                 var delay = (this.hasResponseData('delay') ? this.getResponseData('delay') : 0);
                 var redirectTo = (this.getResponseData('redirect_to') ? this.getResponseData('redirect_to') : false);
                 if(redirectTo){
-                    //$submitBtn.remove();
+                    //btn.remove();
                 }
                 else{
-                    $submitBtn.button('reset');
+                    btn.button('reset');
                 }
                 
                 if(redirectTo){
@@ -482,44 +490,44 @@
                 
                 var hideFormAfterSuccess = (this.getResponseData('hide_form') ? this.getResponseData('hide_form') : this.getConfig('hideFormAfterSuccess'));
                 if(hideFormAfterSuccess){
-                    $form.addClass('hide');
+                    form.addClass('hide');
                 }
                 
                 var removeFormAfterSuccess = (this.getResponseData('remove_form') ? this.getResponseData('remove_form') : this.getConfig('removeFormAfterSuccess'));
                 if(removeFormAfterSuccess){
-                    $form.remove();
+                    form.remove();
                 }
                 
                 var resetFormAfterSuccess = (this.getResponseData('reset_form') ? this.getResponseData('reset_form') : this.getConfig('resetFormAfterSuccess'));
                 if(resetFormAfterSuccess){
-                    this.resetForm($form);
+                    this.resetForm(form);
                 }
                 
-                $form.find(".notification-message").delay(delay).fadeOut('slow',function(){
+                form.find(".notification-message").delay(delay).fadeOut('slow',function(){
                     $(this).remove();
                 });
                 
                 if($config.formSetup.onSuccess !== undefined){
                     var fn = window[$config.formSetup.onSuccess];
                     if (typeof fn === "function"){
-                        return fn($instance,$form,$response, $submitBtn);
+                        return fn($instance,form,$response, btn);
                     }
                 }
                 
                 if($callbacks['onSuccess'] !== undefined){
-                    $callbacks['onSuccess']($instance,$form,$response,$submitBtn);
+                    $callbacks['onSuccess']($instance,form,$response,btn);
                 }
             };
             
-            this.addMessageNotification = function(){
+            this.addMessageNotification = function(form, btn){
                 if(!this.getResponse('message')){
                     return false;
                 }
-                $form.find(".notification-message").remove();
-                if(!$form.find('.formjs-notification-holder').is('*')){
-                    $form.prepend('<div class="formjs-notification-holder"></div>');
+                form.find(".notification-message").remove();
+                if(!form.find('.formjs-notification-holder').is('*')){
+                    form.prepend('<div class="formjs-notification-holder"></div>');
                 }
-                var notificationHolder = $form.find('.formjs-notification-holder');
+                var notificationHolder = form.find('.formjs-notification-holder');
                 var messageType = this.getResponseMessage('type');
                 
                 if(this.getResponseMessage('text')){
