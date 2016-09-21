@@ -140,6 +140,10 @@
                         }
                     }
                     $('.select2').css('width','100%');
+                    
+                    _this.on('select2:open',function(){
+                        $instance.clearElementErrors($(this));
+                    });
                 }
                 
                 $.each($handler.find(".sel2"),function(){
