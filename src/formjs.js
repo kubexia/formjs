@@ -416,7 +416,12 @@
                     //btn.remove();
                 }
                 else{
-                    btn.button('reset');
+                    if(this.getResponseMessage('remove_form')){
+                        btn.remove();
+                    }
+                    else{
+                        btn.button('reset');
+                    }
                 }
                 
                 form.find(".notification-message").delay(delay).fadeOut('slow',function(){
