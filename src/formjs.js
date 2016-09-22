@@ -181,6 +181,63 @@
                         $instance.handleImageStored(_this, f);
                     });
                 });
+                
+                this.handleDeleteImageStored();
+            };
+            
+            this.handleDeleteImageStored = function(){
+                $('.image-upload-remove').click(function(e){
+                    e.preventDefault();
+                    var _this = $(this);
+                    var fileUploadBox = _this.closest('.file-upload-box');
+                    var input = fileUploadBox.find('.file-upload-input');
+                    var imagePreviewBox = fileUploadBox.find('.image-upload-preview');
+                    if(imagePreviewBox.is('*')){
+                        imagePreviewBox.html('');
+                        imagePreviewBox.addClass('hide');
+                        $(this).addClass('hide');
+                        
+                        if(input.attr('data-image-delete-url') === '#' || input.attr('data-image-delete-url') === undefined){
+                            //remove from array
+                            for(var i=0;i<$storedFiles.length;i++) {
+                                if($storedFiles[i].name === input.attr('name')) {
+                                    $storedFiles.splice(i,1);
+                                    break;
+                                }
+                            }
+                        }
+                        else{
+                            $.ajax({
+                                type: "POST",
+                                url: input.attr('data-image-delete-url'),
+                                dataType: 'json',
+                                data: {
+                                    '_method': 'DELETE'
+                                },
+                                success: function(data){
+                                    var returnUrl = (input.attr('data-return-url') === undefined ? false : input.attr('data-return-url'));
+                                    if(returnUrl){
+                                        document.location.href = (returnUrl ? returnUrl : document.location.href);
+                                    }
+                                    
+                                    if(input.attr('data-callback-success') !== undefined){
+                                        var fn = window[input.attr('data-callback-success')];
+                                        if (typeof fn === "function"){
+                                            return fn(_this,data);
+                                        }
+                                    }
+                                },
+                                error: function(xhr, textStatus, errorThrown){
+                                    console.log(xhr.responseText);
+                                }
+                            });
+                            
+                            input.removeAttr('data-image-delete-url');
+                            input.removeAttr('data-image-url');
+                        }
+                    }
+                });
+                
             };
             
             this.handleImageStored = function(input, image){
@@ -205,16 +262,11 @@
                         },
                         {maxWidth: input.attr('data-max-width')} // Options
                     );
-
+                    
+                    /*
                     btnDeleteImage.click(function(e){
                         e.preventDefault();
-                        if(input.attr('data-image-delete-url') === '#' || input.attr('data-image-delete-url') === undefined){
-                            imagePreviewBox.html('');
-                        }
-                        else{
-                            //todo: request delete image url
-                        }
-
+                        imagePreviewBox.html('');
                         imagePreviewBox.addClass('hide');
                         $(this).addClass('hide');
                         
@@ -226,6 +278,7 @@
                             }
                         }
                     });
+                    */
                 }
             };
             
@@ -374,12 +427,17 @@
                                 $instance.addErrors(form, btn, $instance.getResponse('errors'));
                             }
                             else{
+                                $instance.addMessage(form, btn);
+                                /*
+                                 * dont know why i did this... they look the same :)
+                                 * 
                                 if($instance.getResponse('data')){
                                     $instance.handleResponse(form, btn);
                                 }
                                 else{
                                     $instance.addMessage(form, btn);
                                 }
+                                */
                             }
                         },
                         error: function(e){
@@ -559,6 +617,14 @@
                 
                 if($callbacks['onSuccess'] !== undefined){
                     $callbacks['onSuccess']($instance,form,$response, btn);
+                }
+                
+                if(this.getResponseData('appendAttributesTo')){
+                    $.each(this.getResponseData('appendAttributesTo'), function(item, attr){
+                        $.each(attr, function(k,v){
+                            $(item).attr(k,v);
+                        });
+                    })
                 }
             };
             
