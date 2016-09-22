@@ -238,10 +238,23 @@
                     }
                 });
                 
+                $handler.on('click','.image-upload-remove-from-gallery',function(e){
+                    e.preventDefault();
+                    
+                    var element = $(this).closest('.image-upload-gallery-element');
+                    for(var i=0;i<$storedFiles.length;i++) {
+                        if($storedFiles[i].file.name === $(this).attr('data-image-name')) {
+                            $storedFiles.splice(i,1);
+                            break;
+                        }
+                    }
+                    element.remove();
+                });
             };
             
             this.handleImageStored = function(input, image){
                 var fileUploadBox = input.closest('.file-upload-box');
+                
                 var imagePreviewBox = fileUploadBox.find('.image-upload-preview');
                 if(imagePreviewBox.is('*')){
                     var btnDeleteImage = fileUploadBox.find('.image-upload-remove');
@@ -262,23 +275,23 @@
                         },
                         {maxWidth: input.attr('data-max-width')} // Options
                     );
+                }
+                
+                var imagePreviewGalleryBox = fileUploadBox.find('.image-upload-preview-gallery');
+                if(imagePreviewGalleryBox.is('*')){
+                    var gallery = imagePreviewGalleryBox.find('ul');
+                    if(!gallery.is('*')){
+                        imagePreviewGalleryBox.html('<ul class="formjs-image-gallery"></ul>');
+                        gallery = imagePreviewGalleryBox.find('ul');
+                    }
                     
-                    /*
-                    btnDeleteImage.click(function(e){
-                        e.preventDefault();
-                        imagePreviewBox.html('');
-                        imagePreviewBox.addClass('hide');
-                        $(this).addClass('hide');
-                        
-                        //remove from array
-                        for(var i=0;i<$storedFiles.length;i++) {
-                            if($storedFiles[i].name === input.attr('name')) {
-                                $storedFiles.splice(i,1);
-                                break;
-                            }
-                        }
-                    });
-                    */
+                    loadImage(
+                        image,
+                        function (img) {
+                            gallery.append($('<li class="image-upload-gallery-element">').html(img).append('<a href="#" data-image-name="'+image.name+'" class="image-upload-remove-from-gallery"><i class="fa fa-times-circle"></i></a>'));
+                        },
+                        {maxWidth: (input.attr('data-max-width') ? input.attr('data-max-width') : 150)} // Options
+                    );
                 }
             };
             
