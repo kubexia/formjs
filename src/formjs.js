@@ -403,6 +403,19 @@
                 }
             };
             
+            this.event_itemDeleteModal = function(btn){
+                var form = btn.closest($handler);
+                var returnUrl = (btn.data('return-url') !== undefined && btn.data('return-url') !== '' ? btn.data('return-url') : document.location.href);
+                
+                if(btn.attr('data-loading-text') === undefined){
+                    btn.attr('data-loading-text',this.getConfig('loadingText'));
+                }
+                btn.button('loading');
+                
+                alert('todo');
+                
+            };
+            
             this.sendPost = function(form, btn){
                 form.on('submit',function(e){
                     e.preventDefault();
