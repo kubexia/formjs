@@ -384,7 +384,12 @@
                         },
                         error: function(e){
                             console.log(e.responseText);
-                            form.append('ERROR: something went really wrong...');
+                            form.find(".notification-message").remove();
+                            if(!form.find('.formjs-notification-holder').is('*')){
+                                form.prepend('<div class="formjs-notification-holder"></div>');
+                            }
+                            var notificationHolder = form.find('.formjs-notification-holder');
+                            notificationHolder.html('<div class="notification-message alert alert-danger">'+e.responseText+'</div>');
                             btn.button('reset');
                         }
                     });
