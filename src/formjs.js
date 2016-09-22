@@ -33,6 +33,8 @@
             
             var $validatorErrors = {};
             
+            var $storedFiles = [];
+            
             this.init = function(){
                 this.setDefaultConfigs();
                 
@@ -168,64 +170,28 @@
                 if(!input.is('*')){
                     return false;
                 }
-                var filesList = [];
-                var paramNames = [];
-                input.fileupload({
-                    dataType: 'json',
-                    autoUpload: false,
-                    disableExifThumbnail: true,
-                    replaceFileInput: false,
-                    success: function(data){
-                        var form = input.closest($handler);
-                        var btn = form.find('button[data-event="submitForm"]');
-                        $instance.setResponse(data);
-
-                        if($instance.getResponseSuccess() === false){
-                            $instance.addErrors(form, btn, $instance.getResponse('errors'));
-                        }
-                        else{
-                            if($instance.getResponse('data')){
-                                $instance.handleResponse(form, btn);
-                            }
-                            else{
-                                $instance.addMessage(form, btn);
-                            }
-                        }
-                    },
-                    error: function(e){
-                        console.log(e.responseText);
-                    }
-                }).on('fileuploadadd', function (e, data) {
-                    var object = $(this);
-                    filesList.push(data.files[0]);
-                    paramNames.push(e.delegatedEvent.target.name);
+                
+                input.on('change',function(e){
+                    var files = e.target.files;
+                    var filesArr = Array.prototype.slice.call(files);
+                    var _this = $(this);
                     
-                    var form = $(this).closest($handler);
-                    var btn = form.find('button[data-event="submitForm"]');
-                    
-                    $instance.handleImages(object, data.files[0]);
-                    
-                    btn.off('click').on('click', function (e) {
-                        e.preventDefault();
-                        data.files = filesList;
-                        data.originalFiles = filesList;
-                        data.paramName = paramNames;
-                        data.submit();
+                    $.each(filesArr, function(i, f){
+                        $storedFiles.push({name: _this.attr('name'), file: f});
+                        $instance.handleImageStored(_this, f);
                     });
                 });
             };
             
-            this.handleImages = function(object, image){
-                var fileUploadBox = object.closest('.file-upload-box');
-                var input = fileUploadBox.find('.file-upload-input');
+            this.handleImageStored = function(input, image){
+                var fileUploadBox = input.closest('.file-upload-box');
                 var imagePreviewBox = fileUploadBox.find('.image-upload-preview');
-
                 if(imagePreviewBox.is('*')){
                     var btnDeleteImage = fileUploadBox.find('.image-upload-remove');
                     imagePreviewBox.removeClass('hide');
                     btnDeleteImage.removeClass('hide');
                     imagePreviewBox.html(this.getConfig('loadingText'));
-                    
+
                     loadImage(
                         image,
                         function (img) {
@@ -248,9 +214,17 @@
                         else{
                             //todo: request delete image url
                         }
-                        
+
                         imagePreviewBox.addClass('hide');
                         $(this).addClass('hide');
+                        
+                        //remove from array
+                        for(var i=0;i<$storedFiles.length;i++) {
+                            if($storedFiles[i].name === input.attr('name')) {
+                                $storedFiles.splice(i,1);
+                                break;
+                            }
+                        }
                     });
                 }
             };
@@ -373,15 +347,26 @@
 
                     var method = form.attr('method');
                     var action = form.attr('action');
-                    var data = form.serialize();
+                    //var data = form.serializeArray();
                     
                     $instance.clearErrors(form);
-
+                    
+                    var fd = new FormData();
+                    $.each($storedFiles,function(i, item){
+                        fd.append(item.name, item.file);
+                    });
+                    
+                    $.each(form.serializeArray(), function(i, input){
+                        fd.append(input.name, input.value);
+                    })
+                    
                     $.ajax({
                         type: method,
                         url: action,
                         dataType: 'json',
-                        data: data,
+                        contentType: false,
+                        processData: false,
+                        data: fd,
                         success: function(data){
                             $instance.setResponse(data);
 
