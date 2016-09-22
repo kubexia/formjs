@@ -635,8 +635,19 @@
                 if(this.getResponseData('appendAttributesTo')){
                     $.each(this.getResponseData('appendAttributesTo'), function(item, attr){
                         $.each(attr, function(k,v){
-                            $(item).attr(k,v);
+                            if(k === 'class'){
+                                $(item).addClass(v);
+                            }
+                            else{
+                                $(item).attr(k,v);
+                            }
                         });
+                    })
+                }
+                
+                if(this.getResponseData('replaceElementsWith')){
+                    $.each(this.getResponseData('replaceElementsWith'), function(item, value){
+                        $(item).html(value);
                     })
                 }
             };
