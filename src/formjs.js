@@ -181,8 +181,49 @@
                         $instance.handleImageStored(_this, f);
                     });
                 });
-                
                 this.handleDeleteImageStored();
+                this.enableFileDrops();
+            };
+            
+            this.enableFileDrops = function(){
+                window.addEventListener("dragover",function(e){
+                    e = e || event;
+                    e.preventDefault();
+                },false);
+                window.addEventListener("drop",function(e){
+                    e = e || event;
+                    e.preventDefault();
+                },false);
+                
+                var box = $handler.find('.file-upload-box');
+                $.each(box, function(){
+                    var _this = $(this);
+                    var btnFile = _this.find('.btn-file');
+                    var dropZone = _this.find('.file-upload-drop');
+                    _this.on('dragover dragenter', function(){
+                        btnFile.addClass('hide');
+                        dropZone.removeClass('hide');
+                        _this.find('.image-upload-preview ').addClass('hide');
+                        _this.find('.image-upload-preview ').addClass('hide');
+                        _this.find('.image-upload-remove').addClass('hide');
+                    })
+                    .on('dragleave dragend drop', function(){
+                        btnFile.removeClass('hide');
+                        dropZone.addClass('hide');
+                        _this.find('.image-upload-preview ').removeClass('hide');
+                        _this.find('.image-upload-remove').removeClass('hide');
+                    })
+                    .on('drop', function(e){
+                        var files = e.originalEvent.dataTransfer.files;
+                        var filesArr = Array.prototype.slice.call(files);
+                        var _this = $(this);
+
+                        $.each(filesArr, function(i, f){
+                            $storedFiles.push({name: box.find('.file-upload-input').attr('name'), file: f});
+                            $instance.handleImageStored(_this, f);
+                        });
+                    });
+                });
             };
             
             this.handleDeleteImageStored = function(){
@@ -197,7 +238,7 @@
                         imagePreviewBox.addClass('hide');
                         $(this).addClass('hide');
                         
-                        if(input.attr('data-image-delete-url') === '#' || input.attr('data-image-delete-url') === undefined){
+                        if(input.attr('data-image-delete-url') === '' || input.attr('data-image-delete-url') === '#' || input.attr('data-image-delete-url') === undefined){
                             //remove from array
                             for(var i=0;i<$storedFiles.length;i++) {
                                 if($storedFiles[i].name === input.attr('name')) {
